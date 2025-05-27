@@ -1,0 +1,3 @@
+curl -i -X OPTIONS https://53n86oim96.execute-api.us-east-1.amazonaws.com/prod/shorten \
+  -H "Origin: https://reddit.com" \
+  -H "Access-Control-Request-Method: POST"
