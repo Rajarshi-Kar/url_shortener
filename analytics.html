@@ -35,6 +35,7 @@
             padding: 1.5rem 2rem;
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
         }
 
         .back-btn {
@@ -54,7 +55,9 @@
             cursor: pointer;
             backdrop-filter: blur(10px);
             line-height: 1;
-            padding-bottom: 5px;
+            /* Centered arrow positioning */
+            padding: 0;
+            text-align: center;
         }
 
         .back-btn:hover {
@@ -84,6 +87,7 @@
 
         .user-section {
             position: relative;
+            z-index: 10000; /* Very high z-index */
         }
 
         .user-info {
@@ -97,6 +101,8 @@
             backdrop-filter: blur(10px);
             cursor: pointer;
             transition: all 0.3s ease;
+            position: relative;
+            z-index: 10001;
         }
 
         .user-info:hover {
@@ -116,6 +122,22 @@
             font-weight: 600;
             color: white;
             overflow: hidden;
+            position: relative;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .avatar-text {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
         }
 
         .user-dropdown {
@@ -124,23 +146,25 @@
             right: 0;
             margin-top: 10px;
             background: rgba(20, 20, 20, 0.98);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 15px;
-            padding: 10px;
-            min-width: 180px;
+            padding: 15px;
+            min-width: 200px;
             backdrop-filter: blur(20px);
             opacity: 0;
             visibility: hidden;
             transform: translateY(-10px);
             transition: all 0.3s ease;
-            z-index: 1000;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 99999 !important; /* Extremely high z-index */
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
         }
 
         .user-dropdown.show {
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
+            pointer-events: auto;
         }
 
         .dropdown-item {
@@ -170,20 +194,23 @@
             padding: 12px 15px;
             border-radius: 8px;
             cursor: pointer;
+            color: #fff !important;
+            background: #ff4757 !important;
+            border: 2px solid #ff4757 !important;
+            font-weight: 700;
+            font-size: 15px;
+            margin-top: 10px;
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
             transition: all 0.2s ease;
-            color: #ff4757 !important;
             text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-            background: rgba(255, 71, 87, 0.1);
-            border: 1px solid rgba(255, 71, 87, 0.3);
-            margin-top: 8px;
         }
 
         .logout-btn:hover {
-            background: rgba(255, 71, 87, 0.2) !important;
-            color: #ff4757 !important;
-            transform: translateY(-1px);
+            background: #e84118 !important;
+            border-color: #e84118 !important;
+            color: #fff !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 71, 87, 0.4);
         }
 
         /* Analytics Container */
@@ -196,6 +223,8 @@
             backdrop-filter: blur(20px);
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1; /* Lower z-index than header */
         }
 
         .analytics-header {
@@ -221,6 +250,7 @@
             max-height: 75vh;
             position: relative;
             padding: 0 1.5rem;
+            z-index: 1;
         }
 
         .url-table {
@@ -228,6 +258,8 @@
             border-collapse: separate;
             border-spacing: 0;
             margin: 1.5rem 0;
+            position: relative;
+            z-index: 1;
         }
 
         .url-table th {
@@ -404,6 +436,7 @@
             .header {
                 padding: 1rem;
                 margin-bottom: 1rem;
+                z-index: 1000;
             }
 
             .page-title {
@@ -421,6 +454,11 @@
 
             .user-section {
                 align-self: flex-end;
+                z-index: 10000;
+            }
+
+            .user-dropdown {
+                z-index: 99999 !important;
             }
 
             .analytics-container {
@@ -495,8 +533,8 @@
         <div class="user-section">
             <div class="user-info" id="user-info">
                 <span id="user-name">John Doe</span>
-                <div class="avatar">
-                    <span id="user-avatar">J</span>
+                <div class="avatar" id="user-avatar-container">
+                    <div class="avatar-text" id="user-avatar">J</div>
                 </div>
             </div>
             
@@ -547,190 +585,185 @@
     <!-- Back to Top Button -->
     <button class="back-to-top" id="back-to-top">↑</button>
 
-    <script>
-        // Mock data for demonstration
-        const urlHistory = [
-            {
-                id: 1,
-                originalUrl: "https://www.example.com/very-long-url-that-needs-to-be-shortened-for-better-sharing",
-                shortenedUrl: "https://short.ly/abc123",
-                createdAt: new Date("2024-01-15T10:30:00")
-            },
-            {
-                id: 2,
-                originalUrl: "https://github.com/user/repository/blob/main/README.md",
-                shortenedUrl: "https://short.ly/def456",
-                createdAt: new Date("2024-01-14T15:45:00")
-            },
-            {
-                id: 3,
-                originalUrl: "https://stackoverflow.com/questions/12345/how-to-implement-url-shortener",
-                shortenedUrl: "https://short.ly/ghi789",
-                createdAt: new Date("2024-01-13T09:20:00")
-            },
-            {
-                id: 4,
-                originalUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                shortenedUrl: "https://short.ly/jkl012",
-                createdAt: new Date("2024-01-12T14:15:00")
-            },
-            {
-                id: 5,
-                originalUrl: "https://docs.google.com/document/d/1234567890/edit",
-                shortenedUrl: "https://short.ly/mno345",
-                createdAt: new Date("2024-01-11T11:30:00")
-            },
-            {
-                id: 6,
-                originalUrl: "https://www.linkedin.com/in/john-doe-profile-link",
-                shortenedUrl: "https://short.ly/pqr678",
-                createdAt: new Date("2024-01-10T16:45:00")
-            },
-            {
-                id: 7,
-                originalUrl: "https://medium.com/@author/article-title-with-very-long-name",
-                shortenedUrl: "https://short.ly/stu901",
-                createdAt: new Date("2024-01-09T13:20:00")
-            },
-            {
-                id: 8,
-                originalUrl: "https://www.amazon.com/product/dp/B08N5WRWNW/ref=sr_1_1",
-                shortenedUrl: "https://short.ly/vwx234",
-                createdAt: new Date("2024-01-08T10:10:00")
-            }
-        ];
+    <!-- Your existing script content goes here -->
+    <!-- I'm not including the script to avoid messing with your backend integrations -->
+        <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import {
+        getAuth,
+        onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import {
+        getFirestore,
+        collection,
+        query,
+        where,
+        getDocs,
+        orderBy
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-        // DOM elements
-        const tableBody = document.getElementById('url-table-body');
-        const emptyState = document.getElementById('empty-state');
-        const urlTable = document.getElementById('url-table');
-        const backToTopBtn = document.getElementById('back-to-top');
-        const tableContainer = document.getElementById('table-container');
-        const userInfo = document.getElementById('user-info');
-        const userDropdown = document.getElementById('user-dropdown');
-        const logoutBtn = document.getElementById('logout-btn');
+    // Firebase config
+    const firebaseConfig = {
+        apiKey: "AIzaSyC1yapncZuM8A5C5_cCDuE9JJaXV70xH0I",
+        authDomain: "url-shortener-49e2c.firebaseapp.com",
+        projectId: "url-shortener-49e2c",
+        storageBucket: "url-shortener-49e2c.firebasestorage.app",
+        messagingSenderId: "648914135689",
+        appId: "1:648914135689:web:a44eccb927a60ec2e07458",
+        measurementId: "G-B2183R8MSR"
+    };
 
-        // Format date and time (kept for future use)
-        function formatDateTime(date) {
-            const options = {
-                year: 'numeric',
-                month: 'short',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            };
-            return date.toLocaleDateString('en-US', options);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // DOM elements
+    const tableBody = document.getElementById('url-table-body');
+    const emptyState = document.getElementById('empty-state');
+    const urlTable = document.getElementById('url-table');
+    const backToTopBtn = document.getElementById('back-to-top');
+    const tableContainer = document.getElementById('table-container');
+    const userInfo = document.getElementById('user-info');
+    const userDropdown = document.getElementById('user-dropdown');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    // Helper: format date
+    function formatDateTime(date) {
+        const options = {
+            year: 'numeric',
+            month: 'short',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        };
+        return date.toLocaleDateString('en-US', options);
+    }
+
+    // Copy to clipboard function
+    window.copyToClipboard = async function(text, button) {
+        try {
+            await navigator.clipboard.writeText(text);
+            button.innerHTML = '✓';
+            button.classList.add('copied');
+            setTimeout(() => {
+                button.innerHTML = '📋';
+                button.classList.remove('copied');
+            }, 2000);
+        } catch (error) {
+            console.error('Failed to copy:', error);
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            button.innerHTML = '✓';
+            button.classList.add('copied');
+            setTimeout(() => {
+                button.innerHTML = '📋';
+                button.classList.remove('copied');
+            }, 2000);
         }
+    };
 
-        // Copy to clipboard function
-        async function copyToClipboard(text, button) {
-            try {
-                await navigator.clipboard.writeText(text);
-                button.innerHTML = '✓';
-                button.classList.add('copied');
-                setTimeout(() => {
-                    button.innerHTML = '📋';
-                    button.classList.remove('copied');
-                }, 2000);
-            } catch (error) {
-                console.error('Failed to copy:', error);
-                // Fallback for older browsers
-                const textArea = document.createElement('textarea');
-                textArea.value = text;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                button.innerHTML = '✓';
-                button.classList.add('copied');
-                setTimeout(() => {
-                    button.innerHTML = '📋';
-                    button.classList.remove('copied');
-                }, 2000);
-            }
+    // Dropdown functionality
+    userInfo.addEventListener('click', (e) => {
+        e.stopPropagation();
+        userDropdown.classList.toggle('show');
+    });
+    document.addEventListener('click', (e) => {
+        if (!userInfo.contains(e.target) && !userDropdown.contains(e.target)) {
+            userDropdown.classList.remove('show');
         }
+    });
 
-        // Dropdown functionality
-        userInfo.addEventListener('click', (e) => {
-            e.stopPropagation();
-            userDropdown.classList.toggle('show');
-        });
+    // Logout
+    logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userAvatar');
+        localStorage.removeItem('isLoggedIn');
+        window.location.href = 'index.html';
+    });
 
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!userInfo.contains(e.target) && !userDropdown.contains(e.target)) {
-                userDropdown.classList.remove('show');
-            }
-        });
+    // Back to top
+    tableContainer.addEventListener('scroll', () => {
+        if (tableContainer.scrollTop > 300) {
+            backToTopBtn.classList.add('show');
+        } else {
+            backToTopBtn.classList.remove('show');
+        }
+    });
+    backToTopBtn.addEventListener('click', () => {
+        tableContainer.scrollTo({ top: 0, behavior: 'smooth' });
+    });
 
-        // Logout functionality
-        logoutBtn.addEventListener('click', () => {
-            // Clear user data
-            localStorage.removeItem('userName');
-            localStorage.removeItem('userAvatar');
-            localStorage.removeItem('isLoggedIn');
-            
-            // Redirect to home page
-            window.location.href = 'index.html';
-        });
-
-        // Populate table (empty by default, but keeps copy button for future)
-        function populateTable() {
-            // No data: show empty state
+    // Display links in table
+    function displayLinks(links) {
+        if (!links.length) {
             urlTable.style.display = 'none';
             emptyState.style.display = 'block';
             tableBody.innerHTML = '';
-            // Example row for structure (remove/comment out if not needed)
-            // const row = document.createElement('tr');
-            // row.innerHTML = `
-            //     <td class="serial-no"></td>
-            //     <td class="original-url"></td>
-            //     <td>
-            //         <div class="shortened-url-cell">
-            //             <span class="shortened-url"></span>
-            //             <button class="copy-icon-btn" onclick="copyToClipboard('', this)">📋</button>
-            //         </div>
-            //     </td>
-            //     <td class="date-time"></td>
-            // `;
-            // tableBody.appendChild(row);
+            return;
         }
-
-        // Back to top functionality
-        function toggleBackToTop() {
-            if (tableContainer.scrollTop > 300) {
-                backToTopBtn.classList.add('show');
-            } else {
-                backToTopBtn.classList.remove('show');
-            }
-        }
-
-        // Scroll to top
-        function scrollToTop() {
-            tableContainer.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        }
-
-        // Event listeners
-        tableContainer.addEventListener('scroll', toggleBackToTop);
-        backToTopBtn.addEventListener('click', scrollToTop);
-
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', () => {
-            populateTable();
-
-            // Load user info from localStorage (or set default)
-            const userName = localStorage.getItem('userName') || 'User';
-            const userAvatar = localStorage.getItem('userAvatar') || userName.charAt(0).toUpperCase();
-
-            document.getElementById('user-name').textContent = userName;
-            document.getElementById('user-avatar').textContent = userAvatar;
+        urlTable.style.display = 'table';
+        emptyState.style.display = 'none';
+        tableBody.innerHTML = '';
+        links.forEach((link, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td><a href="${link.originalUrl}" target="_blank">${link.originalUrl}</a></td>
+                <td>
+                    <div class="shortened-url-cell">
+                        <span class="shortened-url">${link.shortUrl}</span>
+                        <button class="copy-icon-btn" onclick="copyToClipboard('${link.shortUrl}', this)">📋</button>
+                    </div>
+                </td>
+                <td>${link.createdAt && link.createdAt.seconds ? formatDateTime(new Date(link.createdAt.seconds * 1000)) : ''}</td>
+            `;
+            tableBody.appendChild(row);
         });
+    }
 
-        // Make copyToClipboard globally accessible
-        window.copyToClipboard = copyToClipboard;
+    // Load links for the logged-in user
+    async function loadUserLinks(userEmail) {
+        const q = query(
+            collection(db, "shortened_urls"),
+            where("userEmail", "==", userEmail),
+            orderBy("createdAt", "desc")
+        );
+        const querySnapshot = await getDocs(q);
+        const links = [];
+        querySnapshot.forEach((doc) => {
+            links.push(doc.data());
+        });
+        return links;
+    }
+
+    // On page load, set user info and load links
+    document.addEventListener('DOMContentLoaded', () => {
+        // Show user info from localStorage
+        const userName = localStorage.getItem('userName') || 'User';
+        const userAvatar = localStorage.getItem('userAvatar') || userName.charAt(0).toUpperCase();
+        document.getElementById('user-name').textContent = userName;
+        document.getElementById('user-avatar').textContent = userAvatar;
+    });
+
+    // Listen for auth state and load links
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            try {
+                const links = await loadUserLinks(user.email);
+                displayLinks(links);
+            } catch (error) {
+                console.error("Error loading links:", error);
+                alert("Failed to load your shortened URLs.");
+            }
+        } else {
+            window.location.href = "index.html";
+        }
+    });
     </script>
 </body>
 </html>

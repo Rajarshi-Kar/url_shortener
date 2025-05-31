@@ -790,11 +790,7 @@
                 }
             }
         }
-
-        // Start the typewriter animation
         typeWriter();
-
-        // Grab all the DOM elements I need
         const loginBtn = document.getElementById('login-btn');
         const loginText = document.getElementById('login-text');
         const avatar = document.getElementById('avatar');
@@ -806,7 +802,6 @@
         const googleLoginBtn = document.getElementById('google-login-btn');
         const backToHome = document.getElementById('back-to-home');
 
-        // Form elements for the URL shortener
         const urlForm = document.getElementById('url-form');
         const urlInput = document.getElementById('url-input');
         const shortenBtn = document.getElementById('shorten-btn');
@@ -817,7 +812,6 @@
         const copyBtn = document.getElementById('copy-btn');
         const anotherLinkBtn = document.getElementById('another-link-btn');
 
-        // When I click the login button, show dropdown if logged in, else show login page
         loginBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (window.isLoggedIn) {
@@ -827,7 +821,6 @@
             }
         });
 
-        // Hide the dropdown if I click outside of it
         document.addEventListener('click', (e) => {
             if (!loginBtn.contains(e.target) && !userDropdown.contains(e.target)) {
                 userDropdown.classList.remove('show');
@@ -837,12 +830,10 @@
         function showMainPage() {
             showPage('main-page');
 
-            // Reset everything to the landing state
             resultScreen.style.display = 'none';
             loadingScreen.style.display = 'none';
             landingPage.style.display = 'block';
 
-            // Clear the input field
             urlInput.value = '';
         }
 
@@ -907,52 +898,66 @@
             showMainPage();
         });
 
-        // If I click "Back to Home" on login page, just show the main page
         backToHome.addEventListener('click', (e) => {
             e.preventDefault();
             showMainPage();
         });
 
-        // This is my function to call the backend and get a shortened URL
+        // backend call
         async function shortenUrl(url) {
             const resp = await fetch(
                 "https://53n86oim96.execute-api.us-east-1.amazonaws.com/prod/shorten",
                 {
-                    method: "POST", // Must be POST for my Lambda
+                    method: "POST", 
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ url }) // The key must be "url"
+                    body: JSON.stringify({ url }) 
                 }
             );
             const data = await resp.json();
             if (!resp.ok) throw new Error(data.error || "Shortening failed");
-            return data.short_url; // This matches my Lambda's JSON key
+            return data.short_url; 
         }
 
-        // Handle the form submission for shortening URLs
-        urlForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+urlForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-            const url = urlInput.value.trim();
-            if (!url) return;
+    const url = urlInput.value.trim();
+    if (!url) return;
 
-            landingPage.style.display = 'none';
-            loadingScreen.style.display = 'flex';
+    landingPage.style.display = 'none';
+    resultScreen.style.display = 'none';
+    loadingScreen.style.display = 'flex';
 
+    try {
+        const shortenedUrl = await shortenUrl(url);
+
+        loadingScreen.style.display = 'none';
+        resultScreen.style.display = 'flex';
+        shortenedUrlText.textContent = shortenedUrl;
+
+        if (window.isLoggedIn && window.currentUser) {
             try {
-                const shortenedUrl = await shortenUrl(url);
-
-                loadingScreen.style.display = 'none';
-                resultScreen.style.display = 'flex';
-                shortenedUrlText.textContent = shortenedUrl;
-
-            } catch (error) {
-                console.error('Error shortening URL:', error);
-                landingPage.style.display = 'block';
-                loadingScreen.style.display = 'none';
+                await addDoc(collection(db, "shortened_urls"), {
+                    originalUrl: url,
+                    shortUrl: shortenedUrl,
+                    userEmail: window.currentUser.email,
+                    createdAt: serverTimestamp()
+                });
+                console.log("URL saved to Firestore");
+            } catch (firestoreError) {
+                console.error("Failed to save to Firestore:", firestoreError);
             }
-        });
+        }
 
-        // Copy the shortened URL to clipboard (with fallback for old browsers)
+    } catch (error) {
+        console.error('Error shortening URL:', error);
+        alert('Failed to shorten URL. Please try again.');
+        landingPage.style.display = 'block';
+        loadingScreen.style.display = 'none';
+    }
+});
+
+
         copyBtn.addEventListener('click', async () => {
             try {
                 await navigator.clipboard.writeText(shortenedUrlText.textContent);
@@ -982,20 +987,17 @@
             }
         });
 
-        // When I click "Shorten another link", reset to landing page
         anotherLinkBtn.addEventListener('click', () => {
             resultScreen.style.display = 'none';
             landingPage.style.display = 'block';
             urlInput.value = '';
         });
 
-        // Disable the shorten button if the input is empty
         urlInput.addEventListener('input', () => {
             const url = urlInput.value.trim();
             shortenBtn.disabled = !url;
         });
 
-        // Run this once to set up the UI based on login state
         updateUserInterface();
     </script>
     <script type="module">
@@ -1033,7 +1035,11 @@
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
-        // When I click the Google login button, start the sign-in process
+        window.db = db;
+        window.addDoc = addDoc;
+        window.collection = collection;
+        window.serverTimestamp = serverTimestamp;
+
         googleLoginBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             try {
@@ -1046,6 +1052,8 @@
                     picture: user.photoURL || null,
                 };
                 window.isLoggedIn = true;
+                localStorage.setItem('userName', user.displayName);
+                localStorage.setItem('userAvatar', user.photoURL || user.displayName.charAt(0).toUpperCase());
                 updateUserInterface();
                 showMainPage();
             } catch (error) {
@@ -1055,7 +1063,6 @@
             }
         });
 
-        // Listen for changes in authentication state and update UI accordingly
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 window.currentUser = {
@@ -1074,7 +1081,6 @@
             }
         });
 
-        // When I click logout, sign out from Firebase and update UI
         logoutBtn.addEventListener('click', async () => {
             try {
                 await signOut(auth);
