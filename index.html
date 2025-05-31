@@ -622,6 +622,33 @@
                 font-size: 1.5rem;
             }
         }
+
+        .qrcode-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 18px;
+            margin-bottom: 8px;
+            padding: 24px 0; /* Increased padding */
+            background: rgba(255,255,255,0.04);
+            border-radius: 16px;
+            min-height: 200px; /* Increased min-height */
+        }
+
+        .qrcode-label-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            gap: 10px;
+        }
+
+        .qrcode-label {
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
     </style>
 </head>
 <body>
@@ -691,6 +718,10 @@
                         <div class="shortened-url">
                             <span class="url-text" id="shortened-url-text"></span>
                             <button class="copy-btn" id="copy-btn">Copy</button>
+                        </div>
+                        <div id="qrcode" class="qrcode-box"></div>
+                        <div style="display: flex; justify-content: center; margin-bottom: 8px;">
+                            <button class="copy-btn" id="copy-qr-btn">Copy QR</button>
                         </div>
                     </div>
                     <button class="another-link-btn" id="another-link-btn">
@@ -934,6 +965,7 @@ urlForm.addEventListener('submit', async (e) => {
         loadingScreen.style.display = 'none';
         resultScreen.style.display = 'flex';
         shortenedUrlText.textContent = shortenedUrl;
+        generateQRCode(shortenedUrl);
 
         if (window.isLoggedIn && window.currentUser) {
             try {
@@ -986,6 +1018,33 @@ urlForm.addEventListener('submit', async (e) => {
                 }, 2000);
             }
         });
+
+        document.getElementById('copy-qr-btn').addEventListener('click', async () => {
+    const qrContainer = document.getElementById('qrcode');
+    const img = qrContainer.querySelector('img');
+    if (!img) {
+        alert('QR code not generated yet!');
+        return;
+    }
+    try {
+        // Fetch the image as a blob
+        const response = await fetch(img.src);
+        const blob = await response.blob();
+        await navigator.clipboard.write([
+            new ClipboardItem({ [blob.type]: blob })
+        ]);
+        const btn = document.getElementById('copy-qr-btn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+            btn.textContent = 'Copy QR';
+            btn.classList.remove('copied');
+        }, 2000);
+    } catch (err) {
+        alert('Copying QR code failed. Try right-clicking and copying the image.');
+        console.error(err);
+    }
+});
 
         anotherLinkBtn.addEventListener('click', () => {
             resultScreen.style.display = 'none';
@@ -1094,6 +1153,22 @@ urlForm.addEventListener('submit', async (e) => {
             }
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+    <script>
+    function generateQRCode(shortUrl) {
+    const qrContainer = document.getElementById("qrcode");
+    qrContainer.innerHTML = ""; // Clear any existing QR
+    new QRCode(qrContainer, {
+        text: shortUrl,
+        width: 192,      // Increased size
+        height: 192,     // Increased size
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+    }
+    </script>
+
 
 
 </body>
