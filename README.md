@@ -40,6 +40,67 @@ bitlink/
 
 No external JS or CSS files are used. All logic is embedded inside 
 
+## Installation & Setup
+
+Since this project is fully serverless and deployed on the cloud, there's no local server to run. However, for development or customization, here’s how to set up and run it locally:
+
+1. Clone the Repository:
+```http
+git clone https://github.com/your-username/bitlink-url-shortener.git
+cd bitlink-url-shortener
+```
+
+2. Frontend:
+- No frameworks or CSS libraries are used.
+- Open index.html, analytics.html, or dashboard.html in any browser to preview.
+- All JavaScript is inline inside the HTML files.
+
+3. Deployment:
+- Frontend hosted via AWS S3 + CloudFront under the custom domain https://bitlink.uk
+
+- DNS managed through Cloudflare
+
+- Backend deployed using the AWS Console (Lambda + API Gateway)
+
+There might be issues running this locally with the Firebase Firestore authentication, as specified domains need to be added to it's permission list.
+
+## Usage Instructions
+
+To use the system once deployed:
+
+#### 1. Shorten a URL:
+
+- Navigate to the homepage and paste your original URL.
+
+- Click "Shorten" to receive a custom short URL.
+
+#### 2. Track Analytics:
+
+- Click the "Analytics" link to see total clicks.
+
+- Click through to the "Dashboard" to view timestamped click metadata.
+
+#### 3. Login with Google (Optional):
+
+- Firebase Authentication is integrated for user-specific history.
+
+- Once logged in, you’ll be able to see links you’ve shortened.
+
+#### 4. API Use:
+
+- Refer to the API Reference section to integrate the service into external apps.
+
+#### 5. QR Code Generation:
+
+- Each short URL is also linked to a downloadable QR code on the dashboard.
+
+No additional configurations are required beyond deployment — everything runs on the cloud.
+## Demo
+
+BitLink is currently live and production-ready at https://bitlink.uk
+Video demo- https://youtu.be/MlPTm2RG0CU
+
+
 ## API Reference
 
 #### Get all clicks for a short code
@@ -87,12 +148,6 @@ GET /{short_code}
 
 
 
-
-
-## Demo
-
-BitLink is currently live and production-ready at https://bitlink.uk
-Video demo- https://youtu.be/MlPTm2RG0CU
 
 
 ## Deployment
