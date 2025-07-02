@@ -46,7 +46,7 @@ Since this project is fully serverless and deployed on the cloud, there's no loc
 
 1. Clone the Repository:
 ```http
-git clone https://github.com/your-username/bitlink-url-shortener.git
+git clone https://github.com/rajarshi-kar/bitlink-url-shortener.git
 cd bitlink-url-shortener
 ```
 
